@@ -7,6 +7,7 @@ namespace TheBookClub.Models.Entities
         public string Bio { get; set; }
         public DateTime DateOfBirth { get; set; }
         public string Nationality { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
         public virtual ICollection<Book> Books { get; set; } = new List<Book>();
     }

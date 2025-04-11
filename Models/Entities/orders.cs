@@ -11,6 +11,7 @@ namespace TheBookClub.Models.Entities
         public string? Edition { get; set; }
         public byte OrderStatus { get; set; }
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
+        public bool IsDeleted { get; set; } = false;
 
         public virtual User User { get; set; }
         public virtual Book Book { get; set; }

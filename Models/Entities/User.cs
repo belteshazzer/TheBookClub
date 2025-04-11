@@ -13,6 +13,7 @@ namespace TheBookClub.Models.Entities
         public DateTime RefreshTokenExpiryTime { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
         public virtual ICollection<Orders> Orders { get; set; }
         public virtual ICollection<Bookmark> Bookmark { get; set; }

@@ -1,14 +1,15 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using TheBookClub.Context;
 
 namespace TheBookClub.Repositories
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        private readonly DbContext _dbContext;
+        private readonly ApplicationDbContext _dbContext;
         private readonly DbSet<T> _dbSet;
 
-        public GenericRepository(DbContext dbContext)
+        public GenericRepository(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _dbSet = _dbContext.Set<T>();
@@ -62,14 +63,20 @@ namespace TheBookClub.Repositories
                 var entity = await _dbSet.FindAsync(id);
                 if (entity != null)
                 {
-                    // Assuming the entity has a property called "IsDeleted" for soft deletion
-                    var entry = _dbContext.Entry(entity);
-                    entry.Property("IsDeleted").CurrentValue = true;
-                    await _dbContext.SaveChangesAsync();
-                    return true;
+                    // Check if the entity has an IsDeleted property
+                    var isDeletedProperty = typeof(T).GetProperty("IsDeleted");
+                    if (isDeletedProperty != null && isDeletedProperty.PropertyType == typeof(bool))
+                    {
+                        // Set the IsDeleted property to true
+                        isDeletedProperty.SetValue(entity, true);
+                        await _dbContext.SaveChangesAsync();
+                        return true;
+                    }
+
+                    throw new InvalidOperationException("The entity does not have an IsDeleted property.");
                 }
                 return false;
-            }
+                        }
             catch (DbUpdateException ex)
             {
                 throw new InvalidOperationException("An error occurred while deleting the entity.", ex);
@@ -85,7 +92,9 @@ namespace TheBookClub.Repositories
             try
             {
                 var entities = await _dbSet.ToListAsync();
-                return entities.AsEnumerable();
+                var nonDeletedEntities = entities.Where(e => !(bool)e.GetType().GetProperty("IsDeleted").GetValue(e));
+
+                return nonDeletedEntities.AsEnumerable();
             }
             catch (Exception ex)
             {
@@ -103,7 +112,8 @@ namespace TheBookClub.Repositories
             try
             {
                 var entities = await _dbSet.Where(expression).ToListAsync();
-                return entities.AsEnumerable();
+                var nonDeletedEntities = entities.Where(e => !(bool)e.GetType().GetProperty("IsDeleted").GetValue(e));
+                return nonDeletedEntities.AsEnumerable();
             }
             catch (Exception ex)
             {
@@ -116,6 +126,14 @@ namespace TheBookClub.Repositories
             try
             {
                 var entity = await _dbSet.FindAsync(id);
+                var isDeletedProperty = typeof(T).GetProperty("IsDeleted");
+                if (isDeletedProperty != null && isDeletedProperty.PropertyType == typeof(bool))
+                {
+                    if (entity != null && (bool)isDeletedProperty.GetValue(entity))
+                    {
+                        throw new InvalidOperationException("The entity has been deleted.");
+                    }
+                }
                 return entity ?? throw new KeyNotFoundException($"Entity with the specified ID ({id}) was not found.");
             }
             catch (Exception ex)

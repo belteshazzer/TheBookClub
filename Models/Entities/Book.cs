@@ -18,7 +18,9 @@ namespace TheBookClub.Models.Entities
         public decimal? Price { get; set; }
         public string? PreviewUrl { get; set; }
         public string? CoverImage { get; set; }
+        public decimal Rating { get; set; } = 0;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public bool IsDeleted { get; set; } = false;
 
         public virtual ICollection<Orders> Orders { get; set; }
         public virtual ICollection<Review> Reviews { get; set; }

@@ -15,7 +15,7 @@ namespace TheBookClub.Mapper
             CreateMap<BookmarkDto, Bookmark>().ReverseMap();
             CreateMap<ReviewDto, Review>().ReverseMap();
             CreateMap<GenreDto, Genre>().ReverseMap();
-            CreateMap<OrderDto, Order>().ReverseMap();
+            CreateMap<OrderDto, Orders>().ReverseMap();
             CreateMap<GenreDto, Genre>().ReverseMap();
             CreateMap<AuthorDto, Author>().ReverseMap();
         }
