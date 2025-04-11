@@ -1,8 +1,7 @@
-namespace TheBookClub.Models.Entities
+namespace TheBookClub.Models.Dtos
 {
-    public class Orders
+    public class OrderDto
     {
-        public Guid Id { get; set; }
         public Guid UserId { get; set; }
         public string DeliveryPlace { get; set; }
         public Guid? BookId { get; set; }
@@ -10,9 +9,5 @@ namespace TheBookClub.Models.Entities
         public string? Author { get; set; }
         public string? Edition { get; set; }
         public byte OrderStatus { get; set; }
-        public DateTime OrderDate { get; set; } = DateTime.UtcNow;
-
-        public virtual User User { get; set; }
-        public virtual Book Book { get; set; }
     }
 }

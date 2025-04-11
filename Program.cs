@@ -1,13 +1,22 @@
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using TheBookClub.Common;
 using TheBookClub.Common.EmailSender;
 using TheBookClub.Context;
 using TheBookClub.Mapper;
 using TheBookClub.Middleware.ExceptionMiddleware;
 using TheBookClub.Models.Entities;
 using TheBookClub.Services.AuthServices;
+using TheBookClub.Services.AuthorService;
+using TheBookClub.Services.BookService;
+using TheBookClub.Services.BookmarkService;
+using TheBookClub.Services.GenreService;
+using TheBookClub.Services.OrderService;
+using TheBookClub.Services.ReviewService;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,23 +45,36 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
+
+    var jwtSettings = builder.Configuration.GetSection("Jwt");
+    var key = jwtSettings["Key"];
+    Console.WriteLine($"jwt key lenth: {Encoding.UTF8.GetBytes(key).Length *8} bits");
+    
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
-            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            System.Text.Encoding.UTF8.GetBytes(key))
     };
 });
 
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddTransient<IEmailSender, EmailSender>(); 
 builder.Services.AddAutoMapper(typeof(MappingProfile)); 
 
+
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAuthorService, AuthorService>();
+builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddScoped<IBookmarkService, BookmarkService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IGenreService, GenreService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
@@ -73,12 +95,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.MapControllers();
-
 app.UseMiddleware<ExceptionMiddleware>(); 
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapControllers();
 
 app.Run();
 

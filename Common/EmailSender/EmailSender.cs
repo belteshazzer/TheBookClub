@@ -44,13 +44,37 @@ namespace TheBookClub.Common.EmailSender
                 };
 
                 mailMessage.To.Add(toEmail);
+
+                Console.WriteLine($"Connecting to SMTP server: {_emailSettings.SmtpHost}:{_emailSettings.SmtpPort}");
+                Console.WriteLine($"Using SSL: {_emailSettings.EnableSsl}");
+                Console.WriteLine($"Sending email from: {_emailSettings.SmtpUser} to: {toEmail}");
+
                 await smtpClient.SendMailAsync(mailMessage);
 
                 return true; // Email sent successfully
             }
+            catch (SmtpException smtpEx)
+            {
+                // Log detailed SMTP error information
+                Console.WriteLine($"SMTP error: {smtpEx.Message}");
+                if (smtpEx.StatusCode != SmtpStatusCode.GeneralFailure)
+                {
+                    Console.WriteLine($"SMTP status code: {smtpEx.StatusCode}");
+                }
+                if (smtpEx.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {smtpEx.InnerException.Message}");
+                }
+                return false;
+            }
             catch (Exception ex)
             {
+                // Log general exceptions
                 Console.WriteLine($"Error sending email: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
                 return false;
             }
         }

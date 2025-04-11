@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -39,7 +40,7 @@ namespace TheBookClub.Services.AuthServices
             // Ensure username is set
             if (string.IsNullOrWhiteSpace(user.UserName))
             {
-                user.UserName = user.Email; // Default to email if username is not provided
+                user.UserName = user.Email; 
             }
 
             // Attempt to create the user
@@ -48,6 +49,7 @@ namespace TheBookClub.Services.AuthServices
             if (result.Succeeded)
             {
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                _logger.LogInformation("token: {token}", token);
                 await SendConfirmationEmail(user.Email, token);
                 return user;
             }
@@ -61,7 +63,9 @@ namespace TheBookClub.Services.AuthServices
 
         private async Task SendConfirmationEmail(string email, string token)
         {
-            var confirmationLink = $"https://localhost:5001/confirm-email?email={email}&token={Uri.EscapeDataString(token)}";
+            var confirmationLink = $"http://localhost:5039/api/Auth/confirm-email?email={email}&token={Uri.EscapeDataString(token)}";
+            _logger.LogInformation("confirmationLink: {confirmationLink}", confirmationLink);
+
             var subject = "Password Reset Request";
             var body = string.Format(EmailTemplates.ConfirmEmailTemplate, confirmationLink);
             var emailSent = await _emailSender.SendEmail(email, subject, body);
@@ -71,31 +75,41 @@ namespace TheBookClub.Services.AuthServices
             }
         }
 
-        public async Task VerifyEmailAsync(string email, string token)
+       public async Task<bool> VerifyEmailAsync(string email, string token)
         {
             var user = await _userManager.FindByEmailAsync(email) ?? throw new Exception("User not found");
+            if (user.EmailConfirmed)
+            {
+                throw new Exception("Email is already confirmed"); 
+            }
             var result = await _userManager.ConfirmEmailAsync(user, token);
             if (!result.Succeeded)
             {
-                throw new Exception("Email confirmation failed");
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                _logger.LogError("Email confirmation failed: {Errors}", errors);
+                throw new Exception("Email confirmation failed: " + errors);
             }
+
+            return true;
         }
 
         public async Task<LoginResponse> LoginUserAsync(string email, string password)
         {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                throw new NotFoundException("User not found"); // User does not exist
-            }
+            var user = await _userManager.FindByEmailAsync(email) ?? throw new NotFoundException("User not found");
             var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
             if (result.Succeeded)
             {               
                 var token = GenerateJwtToken(user);
+                user.RefreshToken = GenerateRefreshToken();
+                user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
                 var loginResponse = new LoginResponse
                 {
+                    UserId = user.Id,
+                    Email = user.Email,
                     Token = token,
-                    ExpiresAt = DateTime.UtcNow.AddHours(1) 
+                    TokenExpiryTime = DateTime.UtcNow.AddHours(1),
+                    RefreshToken = user.RefreshToken, 
+                    RefreshTokenExpiryTime = user.RefreshTokenExpiryTime 
                 }; 
                 return loginResponse;
             }
@@ -111,6 +125,14 @@ namespace TheBookClub.Services.AuthServices
             {
                 throw new BadRequestException("Invalid login attempt. Please check your credentials."); 
             }
+        }
+
+        private static string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
         }
 
         public string GenerateJwtToken(User user)
@@ -156,6 +178,7 @@ namespace TheBookClub.Services.AuthServices
             }
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            _logger.LogInformation("Resending confirmation email to {Email} with token: {Token}", email, token);
             await SendConfirmationEmail(email, token);
             return true;
         }
@@ -198,6 +221,18 @@ namespace TheBookClub.Services.AuthServices
             if (!result.Succeeded)
             {
                 throw new Exception("Password change failed: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+            }
+            return true;
+        }
+
+        public async Task<bool> DeleteUserAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email) ?? throw new NotFoundException("User not found");
+
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
+            {
+                throw new Exception("User deletion failed: " + string.Join(", ", result.Errors.Select(e => e.Description)));
             }
             return true;
         }

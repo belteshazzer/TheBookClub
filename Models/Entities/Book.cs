@@ -14,9 +14,11 @@ namespace TheBookClub.Models.Entities
         public string Language { get; set; }
         public string Publisher { get; set; }
         public string FileFormats { get; set; }
-        public int DownloadCount { get; set; }
+        public int DownloadCount { get; set; } = 0;
         public decimal? Price { get; set; }
-        public string PreviewUrl { get; set; }
+        public string? PreviewUrl { get; set; }
+        public string? CoverImage { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public virtual ICollection<Orders> Orders { get; set; }
         public virtual ICollection<Review> Reviews { get; set; }

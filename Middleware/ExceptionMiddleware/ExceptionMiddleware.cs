@@ -34,7 +34,7 @@ namespace TheBookClub.Middleware.ExceptionMiddleware
 
             // Default to 500 Internal Server Error
             int statusCode = (int)HttpStatusCode.InternalServerError;
-            string message = "An unexpected error occurred.";
+            string message = "An unexpected error occurred { " + exception.Message + " }";
 
             if (exception is ApiException apiException)
             {

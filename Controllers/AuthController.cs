@@ -50,6 +50,30 @@ namespace TheBookClub.Controllers
             });
         }
 
+        [HttpGet("confirm-email")]
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public async Task<IActionResult> ConfirmEmail(string email, string token)
+        {
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(token))
+            {
+                return BadRequest(new ApiResponse
+                {
+                    StatusCode = 400,
+                    Data = null,
+                    Message = "Email and token are required."
+                });
+            }
+
+            var result = await _authServices.VerifyEmailAsync(email, token);
+
+            return Ok(new ApiResponse
+            {
+                StatusCode = result ? 200 : 400,
+                Data = null,
+                Message = result ? "Email confirmed successfully" : "Failed to confirm email. Please try again."
+            });
+        }
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
@@ -90,6 +114,7 @@ namespace TheBookClub.Controllers
         {
 
             var result = await _authServices.ResendVerificationEmailAsync(request.Email);
+            _logger.LogInformation("Resending verification email to: {Email}", request.Email);
             return Ok(new ApiResponse
             {
                 StatusCode = result ? 200 : 400,
@@ -134,6 +159,18 @@ namespace TheBookClub.Controllers
                 StatusCode = result ? 200 : 400,
                 Data = null,
                 Message = result ? "Password changed successfully" : "Failed to change password. Please try again."
+            });
+        }
+
+        [HttpDelete("delete-account")]
+        public async Task<IActionResult> DeleteAccount([FromBody] string email)
+        {
+            var result = await _authServices.DeleteUserAsync(email);
+            return Ok(new ApiResponse
+            {
+                StatusCode = result ? 200 : 400,
+                Data = null,
+                Message = result ? "Account deleted successfully" : "Failed to delete account. Please try again."
             });
         }
     }

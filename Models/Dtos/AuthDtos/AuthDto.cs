@@ -8,6 +8,12 @@ namespace TheBookClub.Models.Dtos.AuthDtos
         public string PasswordHash { get; set; }
     }
 
+    public class ConfirmEmailRequest
+    {
+        public string Email { get; set; }
+        public string Token { get; set; }
+    }
+
     public class LoginRequest
     {
         public string Email { get; set; }
@@ -19,8 +25,9 @@ namespace TheBookClub.Models.Dtos.AuthDtos
         public Guid UserId { get; set; } 
         public string Email { get; set; }
         public string Token { get; set; } 
-        public DateTime ExpiresAt { get; set; } 
-        public string? RefreshToken { get; set; } // Optional: if using refresh tokens
+        public DateTime TokenExpiryTime { get; set; } 
+        public string? RefreshToken { get; set; } 
+        public DateTime? RefreshTokenExpiryTime { get; set; } 
     }
 
     public class ResendVerificationRequest
