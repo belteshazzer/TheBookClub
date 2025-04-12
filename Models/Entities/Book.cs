@@ -23,7 +23,7 @@ namespace TheBookClub.Models.Entities
         public bool IsDeleted { get; set; } = false;
 
         public virtual ICollection<Orders> Orders { get; set; }
-        public virtual ICollection<Review> Reviews { get; set; }
+        // public virtual ICollection<Review> Reviews { get; set; }
         public virtual Author Author { get; set; }
         public virtual ICollection<Bookmark> Bookmark { get; set; }
         public virtual ICollection<BookPurchase> BookPurchase { get; set; }

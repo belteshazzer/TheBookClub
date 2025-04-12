@@ -89,7 +89,7 @@ namespace TheBookClub.Context
                     .WithMany(g => g.Books)
                     .HasForeignKey(b => b.GenreId)
                     .OnDelete(DeleteBehavior.Cascade); // Optional: specify delete behavior
-                e.Property(e => e.Rating).HasComputedColumnSql("(SELECT COALESCE(AVG(CAST(r.Rating AS FLOAT)), 0) FROM Reviews r WHERE r.BookId = Id)"); // Computed column for average rating
+                e.Property(e => e.Rating).HasDefaultValue(0);
             });
 
             modelBuilder.Entity<BookPurchase>(e =>
@@ -119,7 +119,7 @@ namespace TheBookClub.Context
                     .HasForeignKey(r => r.UserId)
                     .OnDelete(DeleteBehavior.Cascade); // Optional: specify delete behavior
                 e.HasOne(r => r.Book)
-                    .WithMany(b => b.Reviews)
+                    .WithMany()
                     .HasForeignKey(r => r.BookId)
                     .OnDelete(DeleteBehavior.Cascade); // Optional: specify delete behavior
                 e.Property(e => e.ReviewDate).HasDefaultValueSql("getdate()"); // Default to current date
