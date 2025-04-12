@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using TheBookClub.Common;
@@ -9,8 +10,9 @@ using TheBookClub.Common.EmailSender;
 using TheBookClub.Common.Exceptions;
 using TheBookClub.Models.Dtos.AuthDtos;
 using TheBookClub.Models.Entities;
+using TheBookClub.Services.AuthServices.IAuthServices;
 
-namespace TheBookClub.Services.AuthServices
+namespace TheBookClub.Services.AuthServices.AuthServices
 {
     public class AuthService : IAuthService
     {
@@ -19,10 +21,13 @@ namespace TheBookClub.Services.AuthServices
         private readonly IEmailSender _emailSender;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthService> _logger;
-        public AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IEmailSender emailSender, IConfiguration configuration, ILogger<AuthService> logger)
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+
+        public AuthService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole<Guid>> roleManager, IEmailSender emailSender, IConfiguration configuration, ILogger<AuthService> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
             _emailSender = emailSender ?? throw new ArgumentNullException(nameof(emailSender));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -90,6 +95,13 @@ namespace TheBookClub.Services.AuthServices
                 throw new Exception("Email confirmation failed: " + errors);
             }
 
+            var role = await _roleManager.FindByNameAsync("User") ?? throw new NotFoundException("Role not found");
+            if (string.IsNullOrWhiteSpace(role.Name))
+            {
+                throw new Exception("Role name is invalid");
+            }
+            await _userManager.AddToRoleAsync(user, role.Name);
+
             return true;
         }
 
@@ -99,7 +111,7 @@ namespace TheBookClub.Services.AuthServices
             var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
             if (result.Succeeded)
             {               
-                var token = GenerateJwtToken(user);
+                var token = await GenerateJwtToken(user);
                 user.RefreshToken = GenerateRefreshToken();
                 user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
                 var loginResponse = new LoginResponse
@@ -135,15 +147,17 @@ namespace TheBookClub.Services.AuthServices
             return Convert.ToBase64String(randomNumber);
         }
 
-        public string GenerateJwtToken(User user)
+        public async Task<string> GenerateJwtToken(User user)
         {
-            var claims = new[]
+            var role = await _userManager.GetRolesAsync(user) ?? throw new NotFoundException("Role not found");
+            var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.Role, "User")
+                new Claim(ClaimTypes.Name, user.UserName)
             };
+
+            claims.AddRange(role.Select(r => new Claim(ClaimTypes.Role, r)));
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

@@ -9,7 +9,6 @@ using TheBookClub.Context;
 using TheBookClub.Mapper;
 using TheBookClub.Middleware.ExceptionMiddleware;
 using TheBookClub.Models.Entities;
-using TheBookClub.Services.AuthServices;
 using TheBookClub.Services.AuthorService;
 using TheBookClub.Services.BookService;
 using TheBookClub.Services.BookmarkService;
@@ -17,6 +16,8 @@ using TheBookClub.Services.GenreService;
 using TheBookClub.Services.OrderService;
 using TheBookClub.Services.ReviewService;
 using TheBookClub.Repositories;
+using TheBookClub.Services.AuthServices.IAuthServices;
+using TheBookClub.Services.AuthServices.AuthServices;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -96,6 +97,8 @@ builder.Services.AddScoped<IBookmarkService, BookmarkService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IGenreService, GenreService>();
+builder.Services.AddScoped<IUserRoleService, UserRoleService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
@@ -116,7 +119,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Enter 'Bearer' [space] and then your token in the text input below.\n\nExample: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'"
+        Description = "Enter your token in the text input below.\n\nExample: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'"
     });
 
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement

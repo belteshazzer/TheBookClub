@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using TheBookClub.Models.Dtos;
 using TheBookClub.Services.ReviewService;
 using RLIMS.Common;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TheBookClub.Controllers
 {
+    [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("api/[controller]")]
     public class ReviewController : ControllerBase
@@ -16,7 +18,7 @@ namespace TheBookClub.Controllers
             _reviewService = reviewService;
         }
 
-        [HttpGet("{bookId}")]
+        [HttpGet("get-reviews/{bookId}")]
         public async Task<IActionResult> GetAllReviews(Guid bookId)
         {
             var reviews = await _reviewService.GetAllReviewsAsync(bookId);
@@ -28,7 +30,7 @@ namespace TheBookClub.Controllers
             });
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("get-review/{id}")]
         public async Task<IActionResult> GetReviewById(Guid id)
         {
             var review = await _reviewService.GetReviewByIdAsync(id);
@@ -40,6 +42,7 @@ namespace TheBookClub.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin, User")]
         [HttpPost("add-review")]	
         public async Task<IActionResult> AddReview([FromBody] ReviewDto reviewDto)
         {
@@ -61,6 +64,7 @@ namespace TheBookClub.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin, User")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateReview(Guid id, [FromBody] ReviewDto reviewDto)
         {
@@ -82,6 +86,7 @@ namespace TheBookClub.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin, User")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReview(Guid id)
         {
@@ -93,6 +98,7 @@ namespace TheBookClub.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin, User")]
         [HttpPatch("{id}")]
         public async Task<IActionResult> SoftDeleteReview(Guid id)
         {

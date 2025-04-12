@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using TheBookClub.Models.Dtos;
 using TheBookClub.Services.GenreService;
 using RLIMS.Common;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TheBookClub.Controllers
 {
+    [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("api/[controller]")]
     public class GenreController : ControllerBase
@@ -16,6 +18,7 @@ namespace TheBookClub.Controllers
             _genreService = genreService;
         }
 
+        [Authorize(Roles = "Admin, User")]
         [HttpGet("get-genres")]	
         public async Task<IActionResult> GetAllGenres()
         {
@@ -28,6 +31,7 @@ namespace TheBookClub.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin, User")]
         [HttpGet("get-genre/{id}")]
         public async Task<IActionResult> GetGenreById(Guid id)
         {

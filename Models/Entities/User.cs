@@ -9,8 +9,8 @@ namespace TheBookClub.Models.Entities
         public string SubscriptionType { get; set; } = "Free";
         public string? ProfilePicture { get; set; }
         public byte Status { get; set; }
-        public string RefreshToken { get; set; }
-        public DateTime RefreshTokenExpiryTime { get; set; }
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiryTime { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public bool IsDeleted { get; set; } = false;

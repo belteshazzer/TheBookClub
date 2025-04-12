@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using TheBookClub.Models.Dtos;
 using TheBookClub.Services.OrderService;
 using RLIMS.Common;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TheBookClub.Controllers
 {
+    [Authorize(Roles = "Admin, User")]
     [ApiController]
     [Route("api/[controller]")]
     public class OrderController : ControllerBase

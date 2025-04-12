@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using TheBookClub.Common;
-using TheBookClub.Services.AuthServices;
 using TheBookClub.Models.Entities;
 using TheBookClub.Models.Dtos.AuthDtos;
 using AutoMapper;
 using RLIMS.Common;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using TheBookClub.Services.AuthServices.IAuthServices;
+using Microsoft.AspNetCore.Authorization;
 
-namespace TheBookClub.Controllers
+namespace TheBookClub.Controllers.AuthController
 {
     [ApiController]
     [Route("api/[controller]")]

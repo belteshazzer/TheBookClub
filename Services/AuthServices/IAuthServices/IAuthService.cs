@@ -2,7 +2,8 @@
 using TheBookClub.Models.Dtos.AuthDtos;
 using TheBookClub.Models.Entities;
 
-namespace TheBookClub.Services.AuthServices
+namespace TheBookClub.Services.AuthServices.IAuthServices
+
 {
     public interface IAuthService
     {

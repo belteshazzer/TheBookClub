@@ -6,7 +6,7 @@ using TheBookClub.Services.BookService;
 
 namespace TheBookClub.Controllers{
 
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("api/[controller]")]
     public class BookController : ControllerBase
@@ -17,6 +17,7 @@ namespace TheBookClub.Controllers{
             _bookService = bookService;
         }
 
+        [Authorize(Roles = "Admin, User")]
         [HttpGet("get-books")]	
         public async Task<IActionResult> GetAllBooks()
         {
@@ -28,7 +29,8 @@ namespace TheBookClub.Controllers{
                 Message = "Books retrieved successfully."
             });
         }
-
+        
+        [Authorize(Roles = "Admin, User")]
         [HttpGet("get-book/{id}")]
         public async Task<IActionResult> GetBookById(Guid id)
         {

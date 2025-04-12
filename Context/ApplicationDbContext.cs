@@ -53,18 +53,18 @@ namespace TheBookClub.Context
                 e.HasOne(b => b.User)
                     .WithMany(u => u.Bookmark)
                     .HasForeignKey(b => b.UserId)
-                    .OnDelete(DeleteBehavior.Cascade); // Optional: specify delete behavior
+                    .OnDelete(DeleteBehavior.Cascade); 
                 e.HasOne(b => b.Book)
                     .WithMany(b => b.Bookmark)
                     .HasForeignKey(b => b.BookId)
-                    .OnDelete(DeleteBehavior.Cascade); // Optional: specify delete behavior
+                    .OnDelete(DeleteBehavior.Cascade); 
             });
 
             modelBuilder.Entity<Orders>(e =>
             {
                 e.HasKey(o => o.Id);
                 e.Property(o => o.Id).HasDefaultValueSql("(newid())");
-                e.Property(o => o.OrderDate).IsRequired().HasDefaultValueSql("getdate()"); // Default to current date
+                e.Property(o => o.OrderDate).IsRequired().HasDefaultValueSql("getdate()"); 
                 e.HasOne(o => o.User)
                     .WithMany(u => u.Orders)
                     .HasForeignKey(o => o.UserId)
@@ -84,11 +84,11 @@ namespace TheBookClub.Context
                 e.HasOne(b => b.Author)
                     .WithMany(a => a.Books)
                     .HasForeignKey(b => b.AuthorId)
-                    .OnDelete(DeleteBehavior.Cascade); // Optional: specify delete behavior
+                    .OnDelete(DeleteBehavior.Cascade); 
                 e.HasOne(b => b.Genre)
                     .WithMany(g => g.Books)
                     .HasForeignKey(b => b.GenreId)
-                    .OnDelete(DeleteBehavior.Cascade); // Optional: specify delete behavior
+                    .OnDelete(DeleteBehavior.Cascade); 
                 e.Property(e => e.Rating).HasDefaultValue(0);
             });
 
@@ -96,33 +96,33 @@ namespace TheBookClub.Context
             {
                 e.HasKey(bp => bp.Id);
                 e.Property(bp => bp.Id).HasDefaultValueSql("(newid())");
-                e.Property(bp => bp.PurchaseDate).IsRequired().HasDefaultValueSql("getdate()"); // Default to current date
+                e.Property(bp => bp.PurchaseDate).IsRequired().HasDefaultValueSql("getdate()"); 
                 
                 e.HasOne(bp => bp.Seller)
                     .WithMany(u => u.BookPurchases)
                     .HasForeignKey(bp => bp.SellerId)
-                    .OnDelete(DeleteBehavior.Cascade); // Optional: specify delete behavior
+                    .OnDelete(DeleteBehavior.Cascade); 
                 e.HasOne(bp => bp.Book)
                     .WithMany(b => b.BookPurchase)
                     .HasForeignKey(bp => bp.BookId)
-                    .OnDelete(DeleteBehavior.Cascade); // Optional: specify delete behavior
+                    .OnDelete(DeleteBehavior.Cascade); 
             });
 
             modelBuilder.Entity<Review>(e =>
             {
                 e.HasKey(r => r.Id);
                 e.Property(r => r.Id).HasDefaultValueSql("(newid())");
-                e.Property(r => r.ReviewDate).IsRequired().HasDefaultValueSql("getdate()"); // Default to current date
+                e.Property(r => r.ReviewDate).IsRequired().HasDefaultValueSql("getdate()"); 
                 
                 e.HasOne(r => r.User)
                     .WithMany(u => u.Reviews)
                     .HasForeignKey(r => r.UserId)
-                    .OnDelete(DeleteBehavior.Cascade); // Optional: specify delete behavior
+                    .OnDelete(DeleteBehavior.Cascade); 
                 e.HasOne(r => r.Book)
                     .WithMany()
                     .HasForeignKey(r => r.BookId)
-                    .OnDelete(DeleteBehavior.Cascade); // Optional: specify delete behavior
-                e.Property(e => e.ReviewDate).HasDefaultValueSql("getdate()"); // Default to current date
+                    .OnDelete(DeleteBehavior.Cascade); 
+                e.Property(e => e.ReviewDate).HasDefaultValueSql("getdate()"); 
             });
 
             modelBuilder.Entity<Genre>(e =>
