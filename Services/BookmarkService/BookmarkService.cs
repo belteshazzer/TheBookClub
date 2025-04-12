@@ -3,6 +3,7 @@ using TheBookClub.Models.Dtos;
 using TheBookClub.Models.Entities;
 using TheBookClub.Repositories;
 using TheBookClub.Common;
+using TheBookClub.Services.BookService;
 
 namespace TheBookClub.Services.BookmarkService
 {
@@ -11,12 +12,13 @@ namespace TheBookClub.Services.BookmarkService
         private readonly IGenericRepository<Bookmark> _bookmarkRepository;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public BookmarkService(IGenericRepository<Bookmark> bookmarkRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        private readonly IBookService _bookService;
+        public BookmarkService(IGenericRepository<Bookmark> bookmarkRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor, IBookService bookService)
         {
             _bookmarkRepository = bookmarkRepository;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
+            _bookService = bookService;
         }
 
         public async Task<IEnumerable<Bookmark>> GetAllBookmarksAsync(Guid userId)
@@ -26,16 +28,21 @@ namespace TheBookClub.Services.BookmarkService
 
         public async Task<Bookmark> GetBookmarkAsync(Guid userId, Guid bookId)
         {
-            return await _bookmarkRepository.GetByConditionAsync(b => b.UserId == userId && b.BookId == bookId)
-                                             .ContinueWith(t => t.Result.FirstOrDefault());
+            var bookmark = await _bookmarkRepository.GetByConditionAsync(b => b.UserId == userId && b.BookId == bookId);
+
+            return bookmark.FirstOrDefault()!;
         }
 
         public async Task<Bookmark> AddBookmarkAsync(BookmarkDto bookmarkDto)
         {
-            var userId = TokenHelper.GetUserId(_httpContextAccessor.HttpContext);
+            var httpContext = _httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HttpContext is null.");
+            
+            var userId = TokenHelper.GetUserId(httpContext);
 
             var bookmark = _mapper.Map<Bookmark>(bookmarkDto);
+            var genreId = (await _bookService.GetBookByIdAsync(bookmark.BookId)).GenreId;
             bookmark.UserId = userId;
+            bookmark.GenreId = genreId;
             await _bookmarkRepository.AddAsync(bookmark);
             return bookmark;
         }

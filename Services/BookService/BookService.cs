@@ -2,6 +2,7 @@ using AutoMapper;
 using TheBookClub.Models.Dtos;
 using TheBookClub.Models.Entities;
 using TheBookClub.Repositories;
+using TheBookClub.Services.NotificationService;
 
 namespace TheBookClub.Services.BookService
 {
@@ -9,11 +10,15 @@ namespace TheBookClub.Services.BookService
     {
         private readonly IGenericRepository<Book> _bookRepository;
         private readonly IMapper _mapper;
+        private readonly IGenericRepository<Bookmark> _bookmarkRepository;
+        private readonly INotificationService _notificationService;
 
-        public BookService(IGenericRepository<Book> bookRepository, IMapper mapper)
+        public BookService(IGenericRepository<Book> bookRepository, IGenericRepository<Bookmark> bookmarkRepository, IMapper mapper, INotificationService notificationService)
         {
             _bookRepository = bookRepository;
+            _bookmarkRepository = bookmarkRepository;
             _mapper = mapper;
+            _notificationService = notificationService;
         }
 
         public async Task<IEnumerable<Book>> GetAllBooksAsync()
@@ -31,6 +36,7 @@ namespace TheBookClub.Services.BookService
             var book = _mapper.Map<Book>(bookDto);
             await _bookRepository.AddAsync(book);
 
+            await AnnounceBookAddedAsync(book.GenreId, $"New book added: {book.Name} by {book.Author}");
             return book;
         }
 
@@ -51,6 +57,13 @@ namespace TheBookClub.Services.BookService
         public async Task<bool> SoftDeleteBookAsync(Guid id)
         {
             return await _bookRepository.SoftDeleteAsync(id);
+        }
+
+        public async Task AnnounceBookAddedAsync(Guid genreId, string message)
+        {
+            var targetUsers = (await _bookmarkRepository.GetByConditionAsync(b => b.GenreId == genreId)).Select(b => b.UserId).ToList();
+
+            await _notificationService.SendGroupNotificationAsync(targetUsers, message);
         }
     }
 }

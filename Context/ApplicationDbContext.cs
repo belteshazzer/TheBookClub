@@ -19,6 +19,7 @@ namespace TheBookClub.Context
         public DbSet<BookPurchase> BookPurchases { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Genre> Genres { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -129,6 +130,17 @@ namespace TheBookClub.Context
             {
                 e.HasKey(g => g.Id);
                 e.Property(g => g.Id).HasDefaultValueSql("(newid())");
+            });
+
+            modelBuilder.Entity<Notification>(e =>
+            {
+                e.HasKey(n => n.Id);
+                e.Property(n => n.Id).HasDefaultValueSql("(newid())");
+                e.Property(n => n.CreatedAt).IsRequired().HasDefaultValueSql("getdate()"); 
+                e.HasOne(n => n.User)
+                    .WithMany()
+                    .HasForeignKey(n => n.UserId)
+                    .OnDelete(DeleteBehavior.Cascade); 
             });
         }
     }
