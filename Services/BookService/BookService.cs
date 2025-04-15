@@ -34,7 +34,24 @@ namespace TheBookClub.Services.BookService
         public async Task<Book> AddBookAsync(BookDto bookDto)
         {
             var book = _mapper.Map<Book>(bookDto);
-            await _bookRepository.AddAsync(book);
+            if (bookDto.Upload != null)
+            {                
+                var uploadsFolder = "C:\\Users\\CBE\\Projects\\personal\\TheBookClub\\Uploads";
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+                var fileName = $"{Guid.NewGuid()}_{bookDto.Upload.FileName}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await bookDto.Upload.CopyToAsync(stream);
+                }
+                book.FileUrl = filePath;
+
+                await _bookRepository.AddAsync(book);
+            }
 
             await AnnounceBookAddedAsync(book.GenreId, $"New book added: {book.Name} by {book.Author}");
             return book;
@@ -51,6 +68,11 @@ namespace TheBookClub.Services.BookService
   
         public async Task<bool> DeleteBookAsync(Guid id)
         {
+            var book = await _bookRepository.GetByIdAsync(id);
+            if (!string.IsNullOrEmpty(book.FileUrl) && File.Exists(book.FileUrl))
+            {
+                File.Delete(book.FileUrl);
+            }
             return await _bookRepository.DeleteAsync(id);
         }
 
@@ -64,6 +86,40 @@ namespace TheBookClub.Services.BookService
             var targetUsers = (await _bookmarkRepository.GetByConditionAsync(b => b.GenreId == genreId)).Select(b => b.UserId).ToList();
 
             await _notificationService.SendGroupNotificationAsync(targetUsers, message);
+        }
+
+        public async Task<(Stream FileStream, string FileName)> GetBookFileAsync(Guid id)
+        {
+            var book = await _bookRepository.GetByIdAsync(id);
+            if(book == null || string.IsNullOrEmpty(book.FileUrl))
+            {
+                throw new FileNotFoundException("Book not found.");
+            }
+
+            var filePath = book.FileUrl;
+            var fileName = Path.GetFileName(filePath);
+
+            if(!File.Exists(filePath))
+            {
+                throw new FileNotFoundException("File not found.");
+            }
+
+            var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            return (fileStream, fileName);
+        }
+
+        public async Task DownloadBookAsync(Guid id)
+        {
+            var book = await _bookRepository.GetByIdAsync(id);
+            if (book != null)
+            {
+                book.DownloadCount++;
+                await _bookRepository.UpdateAsync(book);
+            }
+            else
+            {
+                throw new Exception("Book not found.");
+            }
         }
     }
 }

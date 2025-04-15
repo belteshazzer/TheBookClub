@@ -1,4 +1,4 @@
-namespace RLIMS.Common
+namespace TheBookClub.Common
 {
     public class ApiResponse
     {

@@ -6,7 +6,7 @@ namespace TheBookClub.Models.Dtos
         public Guid AuthorId { get; set; }
         public int Year { get; set; }
         public string? Edition { get; set; }
-        public string FileUrl { get; set; }
+        public required IFormFile Upload { get; set; }
         public Guid? GenreId { get; set; }
         public string? Description { get; set; }
         public string? ISBN { get; set; }

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TheBookClub.Models.Dtos;
 using TheBookClub.Services.BookmarkService;
-using RLIMS.Common;
+using TheBookClub.Common;
 using Microsoft.AspNetCore.Authorization;
 
 namespace TheBookClub.Controllers

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using RLIMS.Common;
+using TheBookClub.Common;
 using TheBookClub.Models.Dtos;
 using TheBookClub.Services.BookService;
 
@@ -52,7 +52,7 @@ namespace TheBookClub.Controllers{
         }
 
         [HttpPost("add-book")]
-        public async Task<IActionResult> AddBook([FromBody] BookDto bookDto)
+        public async Task<IActionResult> AddBook([FromForm] BookDto bookDto)
         {
             if (bookDto == null)
             {
@@ -93,6 +93,23 @@ namespace TheBookClub.Controllers{
             });
         }
 
+        [HttpGet("download-book/{id}")]
+        public async Task<IActionResult> DownloadBook(Guid id)
+        {
+            var (fileStream, fileName) = await _bookService.GetBookFileAsync(id);
+            if (fileStream == null)
+            {
+                return NotFound(new ApiResponse
+                {
+                    StatusCode = StatusCodes.Status404NotFound,
+                    Message = "Book not found."
+                });
+            }
+            var mimeType = GetMimeType(fileName);
+
+            return File(fileStream, mimeType, fileName); 
+        }
+
         [HttpDelete("delete-book/{id}")]
         public async Task<IActionResult> DeleteBook(Guid id)
         {
@@ -115,6 +132,23 @@ namespace TheBookClub.Controllers{
                 StatusCode = StatusCodes.Status200OK,
                 Message = "Book soft deleted successfully."
             });
+        }
+
+        private string GetMimeType(string fileName)
+        {
+            var extension = Path.GetExtension(fileName).ToLowerInvariant();
+            return extension switch
+            {
+                ".pdf" => "application/pdf",
+                ".epub" => "application/epub+zip",
+                ".txt" => "text/plain",
+                ".doc" => "application/msword",
+                ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ".jpg" => "image/jpeg",
+                ".png" => "image/png",
+                ".zip" => "application/zip",
+                _ => "application/octet-stream", 
+            };
         }
     }
 }

@@ -25,6 +25,12 @@ namespace TheBookClub.Services.NotificationService
             foreach (var userId in userIds)
             {
                 await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveNotification", message);
+                await _repository.AddAsync(new Notification
+                {
+                    UserId = userId,
+                    Message = message,
+                    IsRead = false,
+                });
             }
         }
 

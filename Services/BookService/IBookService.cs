@@ -11,5 +11,7 @@ namespace TheBookClub.Services.BookService
         Task<Book> UpdateBookAsync(Guid id, BookDto book);
         Task<bool> DeleteBookAsync(Guid id);
         Task<bool> SoftDeleteBookAsync(Guid id);
+        Task<(Stream FileStream, string FileName)> GetBookFileAsync(Guid id);
+        Task DownloadBookAsync(Guid id);
     }
 }

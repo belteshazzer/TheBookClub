@@ -56,7 +56,7 @@ namespace TheBookClub.Context
                     .HasForeignKey(b => b.UserId)
                     .OnDelete(DeleteBehavior.Cascade); 
                 e.HasOne(b => b.Book)
-                    .WithMany(b => b.Bookmark)
+                    .WithMany()
                     .HasForeignKey(b => b.BookId)
                     .OnDelete(DeleteBehavior.Cascade); 
             });

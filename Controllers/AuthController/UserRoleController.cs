@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RLIMS.Common;
+using TheBookClub.Common;
 using TheBookClub.Models.Dtos.AuthDtos;
 using TheBookClub.Services.AuthServices.IAuthServices;
 

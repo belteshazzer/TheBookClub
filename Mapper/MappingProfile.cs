@@ -11,7 +11,8 @@ namespace TheBookClub.Mapper
         {
             // Map RegisterRequestDto to User
             CreateMap<RegisterRequestDto, User>().ReverseMap();
-            CreateMap<BookDto, Book>().ReverseMap();
+            CreateMap<BookDto, Book>()
+                .ForMember(dest => dest.FileUrl, opt => opt.Ignore()).ReverseMap();
             CreateMap<BookmarkDto, Bookmark>().ReverseMap();
             CreateMap<ReviewDto, Review>().ReverseMap();
             CreateMap<GenreDto, Genre>().ReverseMap();
@@ -21,3 +22,4 @@ namespace TheBookClub.Mapper
         }
     }
 }
+ 

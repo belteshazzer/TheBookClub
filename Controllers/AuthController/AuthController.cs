@@ -3,7 +3,7 @@ using TheBookClub.Common;
 using TheBookClub.Models.Entities;
 using TheBookClub.Models.Dtos.AuthDtos;
 using AutoMapper;
-using RLIMS.Common;
+using TheBookClub.Common;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using TheBookClub.Services.AuthServices.IAuthServices;
 using Microsoft.AspNetCore.Authorization;
