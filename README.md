@@ -1,6 +1,8 @@
 # 📚 TheBookClub
 
-**TheBookClub** is a feature-rich **ASP.NET Core Web API** project designed to manage E-Book operations, user interactions, and real-time notifications. This project demonstrates advanced concepts in ASP.NET Core, including **role-based authorization**, **real-time communication using SignalR**, and a **robust notification system**.
+**TheBookClub** TheBookClub is an **ASP.NET Core Web API** designed to manage book-related operations, user interactions, and real-time notifications. It features **user authentication and authorization** with role-based access control, **two-factor authentication (2FA)** for enhanced security, and **JWT-based authentication** for secure API access. The application supports CRUD operations for books, authors, genres, and reviews, along with **file uploads** for book-related content.
+
+Key features include **real-time notifications** using SignalR, allowing users to receive updates on new books or events, and **soft delete functionality** for preserving data integrity. The API also provides endpoints for managing bookmarks, personalized recommendations, and administrative tools for managing roles and users. Designed with scalability and security in mind, TheBookClub is a robust backend solution for book management systems..
 
 ---
 
@@ -32,6 +34,9 @@
 - Analytics for total users, books, and reviews
 - Role management and user account control
 
+### Other Features
+- File download support for book content.
+- Resend email verification functionality.
 ---
 
 ## 🛠 Technologies Used
@@ -53,15 +58,10 @@
 - Swashbuckle (Swagger) for API documentation
 - Microsoft.Extensions.Logging for logging
 - Newtonsoft.Json for JSON serialization
+- Encodings.Web for QR code generation
 
 ---
 
-## 📂 Project Structure
-
-/Controllers -> API endpoints /Services -> Business logic /Repositories -> Data access with EF Core /Hubs -> SignalR hubs /Models -> Entity models /Configurations -> App settings and configuration
-
-
----
 
 ## ⚙️ Setup and Configuration
 
@@ -70,56 +70,27 @@
 - SQL Server
 - Visual Studio 2022 or VS Code
 
-### 📦 Install Dependencies
-```bash
-dotnet restore
-```
-### 🔧 Configuration
-
-## Database Connection
-
-Edit appsettings.json:
-```
-"ConnectionStrings": {
-  "DefaultConnection": "Server=YOUR_SERVER;Database=TheBookClubDB;Trusted_Connection=True;"
-}
-// JWT Configuration
-"Jwt": {
-  "Key": "YourSecretKeyHere",
-  "Issuer": "yourapp.com",
-  "Audience": "yourapp.com"
-}
-
-```
-### 📦 Database Migrations
-```
-dotnet ef database update
-```
-
-### Running the Project
-```
-dotnet run
-```
-
-Access Swagger UI at:
-👉 https://localhost:5001/swagger
-
 ### 🧪 How to Fork and Run
 ```
 1. Clone the repository
 git clone https://github.com/your-username/TheBookClub.git
 
-2. Install dependencies
+2. Install dependencies by running the following
 dotnet restore
 
-3. Configure database in appsettings.json
-
-4. Apply migrations
+3. create your database on SQL
+4. Configure database in appsettings.json
+  "ConnectionStrings": {
+  "DefaultConnection": "Server=YOUR_SERVER;Database=TheBookClubDB;Trusted_Connection=True;"
+}
+5. Apply migrations
 dotnet ef database update
 
-5. Run the application
+6. Run the application
 dotnet run
 ```
+Access Swagger UI at:
+👉 https://localhost:5001/swagger
 
 ### 🔑 Key API Endpoints
 ## 🔐 Authentication
@@ -135,9 +106,9 @@ dotnet run
 `DELETE /api/books/{id}` - Soft delete (Admin only)
 
 ## 🔔 Notifications
-`POST /api/notifications/send` - Send to a user
+`POST /api/notifications/SendNotification/{userId}` - Send to a user
 
-`POST /api/notifications/send-group` - Send to a group
+`POST /api/notifications/SendGroupNotification` - Send to a group
 
 ## 👥 Roles
 `GET /api/roles` - Get all roles (Admin only)
@@ -145,13 +116,12 @@ dotnet run
 `POST /api/roles` - Add a new role (Admin only)
 
 ### 🚀 Advanced Features
-- Real-Time Notifications using SignalR
+- Real-Time Notifications to a user and group of users using SignalR
 
-- Role-Based Authorization: [Authorize(Roles = "Admin,Moderator")]
+- Role-Based Authorization: [Authorize(Roles = "Admin,User")]
 
 - Persistent Notifications for offline users
 
-- Group Notifications via SignalR groups
 
  ### 🌱 Future Enhancements
 - Social login support (Google, Facebook)
