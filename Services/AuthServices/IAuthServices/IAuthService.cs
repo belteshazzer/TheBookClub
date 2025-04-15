@@ -14,6 +14,8 @@ namespace TheBookClub.Services.AuthServices.IAuthServices
         Task<bool> SendPasswordResetEmailAsync(string email);
         Task<bool> ChangePasswordAsync(string email, string oldPassword, string newPassword);
         Task<LoginResponse> LoginUserAsync(string email, string password);
+        Task<(string key, string qrCodeUrl)> Enable2FAAsync();
+        Task<bool> Verify2FACodeAsync(string code);
         Task LogoutUserAsync();
         Task<bool> DeleteUserAsync(string email);
     }

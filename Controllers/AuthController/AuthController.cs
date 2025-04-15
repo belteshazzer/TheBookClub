@@ -97,6 +97,40 @@ namespace TheBookClub.Controllers.AuthController
             });
         }
 
+        [HttpPut("enable-2fa")]
+        public async Task<IActionResult> Enable2FA()
+        {
+            var result = await _authServices.Enable2FAAsync();
+            return Ok(new ApiResponse
+            {
+                StatusCode = 200,
+                Data = result,
+                Message = "Two-factor authentication enabled"
+            });
+        }
+
+        [HttpPut("Verify-2fa")]
+        public async Task<IActionResult> Verify2FA([FromBody] string code)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                return BadRequest(new ApiResponse
+                {
+                    StatusCode = 400,
+                    Data = null,
+                    Message = "Code is required."
+                });
+            }
+
+            var result = await _authServices.Verify2FACodeAsync(code);
+            return Ok(new ApiResponse
+            {
+                StatusCode = 200,
+                Data = result,
+                Message = "Two-factor authentication verified"
+            });
+        }
+
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {

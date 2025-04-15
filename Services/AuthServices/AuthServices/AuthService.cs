@@ -11,6 +11,7 @@ using TheBookClub.Common.Exceptions;
 using TheBookClub.Models.Dtos.AuthDtos;
 using TheBookClub.Models.Entities;
 using TheBookClub.Services.AuthServices.IAuthServices;
+using System.Text.Encodings.Web;
 
 namespace TheBookClub.Services.AuthServices.AuthServices
 {
@@ -22,8 +23,10 @@ namespace TheBookClub.Services.AuthServices.AuthServices
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthService> _logger;
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly UrlEncoder _urlEncoder = UrlEncoder.Default;
 
-        public AuthService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole<Guid>> roleManager, IEmailSender emailSender, IConfiguration configuration, ILogger<AuthService> logger)
+        public AuthService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole<Guid>> roleManager, IEmailSender emailSender, IConfiguration configuration, ILogger<AuthService> logger,IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -31,6 +34,7 @@ namespace TheBookClub.Services.AuthServices.AuthServices
             _emailSender = emailSender ?? throw new ArgumentNullException(nameof(emailSender));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
         }
 
         public async Task<User> RegisterUserAsync(User user, string password)
@@ -171,6 +175,48 @@ namespace TheBookClub.Services.AuthServices.AuthServices
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public async Task<(string key, string qrCodeUrl)> Enable2FAAsync()
+        {
+            // Get the current user from the HTTP context
+            var userId = TokenHelper.GetUserId(_httpContextAccessor.HttpContext);
+            var user = await _userManager.FindByIdAsync(userId.ToString()) ?? throw new NotFoundException("User not found");
+
+            // Retrieve the current authenticator key
+            var key = await _userManager.GetAuthenticatorKeyAsync(user);
+            _logger.LogInformation("Authenticator key: {Key}", key);
+
+            // If the key is null or empty, reset and generate a new authenticator key
+            if (string.IsNullOrEmpty(key))
+            {
+                await _userManager.ResetAuthenticatorKeyAsync(user);
+                key = await _userManager.GetAuthenticatorKeyAsync(user);
+            }
+
+            // Generate the QR code URL for the authenticator app
+            var qrCodeUrl = $"otpauth://totp/{Uri.EscapeDataString("TheBookClub")}:{Uri.EscapeDataString(user.Email)}?secret={key}&issuer={Uri.EscapeDataString("TheBookClub")}&digits=6";
+            _logger.LogInformation("QR Code URL: {QrCodeUrl}", qrCodeUrl);
+
+            return (key, qrCodeUrl);
+        }
+
+        public async Task<bool> Verify2FACodeAsync(string code)
+        {
+            // Get the current user from the HTTP context
+            var userId = TokenHelper.GetUserId(_httpContextAccessor.HttpContext);
+            var user = await _userManager.FindByIdAsync(userId.ToString()) ?? throw new NotFoundException("User not found");
+
+            // Verify the provided 2FA code
+            var result = await _userManager.VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultAuthenticatorProvider, code);
+            if (!result)
+            {
+                throw new UnauthorizedException("Invalid 2FA code. Please try again.");
+            }
+
+            user.TwoFactorEnabled = true;
+            var updateResult = await _userManager.UpdateAsync(user);
+            return true;
         }
 
         public async Task LogoutUserAsync()
