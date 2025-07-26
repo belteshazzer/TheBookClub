@@ -1,43 +1,22 @@
 # 📚 TheBookClub
 
-**TheBookClub** TheBookClub is an **ASP.NET Core Web API** designed to manage book-related operations, user interactions, and real-time notifications. It features **user authentication and authorization** with role-based access control, **two-factor authentication (2FA)** for enhanced security, and **JWT-based authentication** for secure API access. The application supports CRUD operations for books, authors, genres, and reviews, along with **file uploads** for book-related content.
-
-Key features include **real-time notifications** using SignalR, allowing users to receive updates on new books or events, and **soft delete functionality** for preserving data integrity. The API also provides endpoints for managing bookmarks, personalized recommendations, and administrative tools for managing roles and users. Designed with scalability and security in mind, TheBookClub is a robust backend solution for book management systems..
-
----
-
-## 🚀 Features
-
-### 🔐 User Authentication and Authorization
+**TheBookClub** is an **ASP.NET Core Web API** designed to manage book-related operations, user interactions, and real-time notifications.
+## 🚀 What is done inside?
 - Role-based access control (`Admin`, `User`)
-- JWT-based authentication for secure API access
+- JWT-based authentication for secure API access and role-based access control
 - Two-factor authentication (2FA) for enhanced security
-
-### 📚 Book Management
-- CRUD operations for books, authors, and genres
-- Soft delete functionality for books
-- Real-time notifications for new book additions
-
-### 🔖 Bookmarking and Recommendations
-- Users can bookmark genres and receive notifications
-- Personalized book recommendations based on preferences
-
-### 🔔 Real-Time Notifications
-- Notifications for users and groups via **SignalR**
-- Persistent notifications stored in the database
-
-### 🔍 Advanced Search and Filtering
-- Full-text search for books, authors, and genres
-- Filter/sort by rating, genre, and publication date
-
-### 📊 Admin Dashboard
-- Analytics for total users, books, and reviews
+- Real-time notifications via **SignalR**
 - Role management and user account control
+- **File** download support for book content
+- Filter/sort by different attributes
+- **soft delete functionality** for preserving data integrity
+- CRUD operations
 
-### Other Features
-- File download support for book content.
-- Resend email verification functionality.
----
+📚 Book Store Management
+🔖 Bookmarking and Recommendations
+🔔 Real-Time Notifications of Book arrival
+🔍 Advanced Search and Filtering
+📊 Admin tools to manage the store
 
 ## 🛠 Technologies Used
 
@@ -73,18 +52,28 @@ Key features include **real-time notifications** using SignalR, allowing users t
 ### 🧪 How to Fork and Run
 ```
 1. Clone the repository
-git clone https://github.com/your-username/TheBookClub.git
+git clone https://github.com/belteshazzer/TheBookClub.git
 
 2. Install dependencies by running the following
 dotnet restore
 
-3. create your database on SQL
+3. create TheBookClub database on SQL
 4. Configure database in appsettings.json
   "ConnectionStrings": {
-  "DefaultConnection": "Server=YOUR_SERVER;Database=TheBookClubDB;Trusted_Connection=True;"
+  "DefaultConnection": "Server=YOUR_SERVER;User=qwert;Password=qwertyui;Database=TheBookClubDB;Trusted_Connection=True;TrustServerCertificate=true;MultipleActiveResultSets=true"
 }
 5. Apply migrations
 dotnet ef database update
+
+6. Update your Email Setting
+"EmailSettings": {
+    "SmtpHost": "smtp.gmail.com",
+    "SmtpPort": 587,
+    "SmtpUser": "youremail@gmail.com",
+    "SmtpPass": "email's password", // generate an app password if you're using 2FA for your email
+    "EnableSsl": true,
+    "SenderName": "The Book Club"
+  },
 
 6. Run the application
 dotnet run
@@ -94,7 +83,7 @@ Access Swagger UI at:
 
 ### 🔑 Key API Endpoints
 ## 🔐 Authentication
-`POST /api/auth/login` - Login and receive JWT
+`POST /api/auth/login` - Login and receive JWT token
 
 `POST /api/auth/register` - Register a new user
 
@@ -115,22 +104,3 @@ Access Swagger UI at:
 
 `POST /api/roles` - Add a new role (Admin only)
 
-### 🚀 Advanced Features
-- Real-Time Notifications to a user and group of users using SignalR
-
-- Role-Based Authorization: [Authorize(Roles = "Admin,User")]
-
-- Persistent Notifications for offline users
-
-
- ### 🌱 Future Enhancements
-- Social login support (Google, Facebook)
-
-- ML.NET-powered recommendation engine
-
-- Localization for multiple languages
-
-- Frontend client using React or Angular
-
-  ### 📬 Contact
-Email: daniyirdaw0310@gmail.com
