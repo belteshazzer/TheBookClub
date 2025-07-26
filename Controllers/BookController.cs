@@ -6,7 +6,6 @@ using TheBookClub.Services.BookService;
 
 namespace TheBookClub.Controllers{
 
-    [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("api/[controller]")]
     public class BookController : ControllerBase
@@ -51,6 +50,7 @@ namespace TheBookClub.Controllers{
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("add-book")]
         public async Task<IActionResult> AddBook([FromForm] BookDto bookDto)
         {
@@ -72,6 +72,7 @@ namespace TheBookClub.Controllers{
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("update-book/{id}")]
         public async Task<IActionResult> UpdateBook(Guid id, [FromBody] BookDto bookDto)
         {
@@ -93,6 +94,7 @@ namespace TheBookClub.Controllers{
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("download-book/{id}")]
         public async Task<IActionResult> DownloadBook(Guid id)
         {
@@ -121,7 +123,8 @@ namespace TheBookClub.Controllers{
                 Message = "Book deleted successfully."
             });
         }
-
+        
+        [Authorize(Roles = "Admin")]
         [HttpPatch("delete-book/{id}")]
         public async Task<IActionResult> SoftDeleteBook(Guid id)
         {

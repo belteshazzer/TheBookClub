@@ -9,7 +9,7 @@ Key features include **real-time notifications** using SignalR, allowing users t
 ## 🚀 Features
 
 ### 🔐 User Authentication and Authorization
-- Role-based access control (`Admin`, `Moderator`, `User`)
+- Role-based access control (`Admin`, `User`)
 - JWT-based authentication for secure API access
 - Two-factor authentication (2FA) for enhanced security
 

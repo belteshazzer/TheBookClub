@@ -57,6 +57,7 @@ namespace TheBookClub.Services.AuthServices.AuthServices
 
             if (result.Succeeded)
             {
+                await _userManager.AddToRoleAsync(user, "User"); // Assign default role
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 _logger.LogInformation("token: {token}", token);
                 await SendConfirmationEmail(user.Email, token);

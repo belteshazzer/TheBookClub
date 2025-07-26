@@ -37,6 +37,8 @@ namespace TheBookClub.Controllers
             });
         }
 
+        
+
         [HttpGet("Get-user-notifications/{userId}")]
         public async Task<IActionResult> GetNotifications(Guid userId)
         {
