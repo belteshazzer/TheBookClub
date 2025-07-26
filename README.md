@@ -5,6 +5,7 @@
 - Role-based access control (`Admin`, `User`)
 - JWT-based authentication for secure API access and role-based access control
 - Two-factor authentication (2FA) for enhanced security
+- **Rate Limiting** to avoid too many requests and Prevents Abuse and Overuse
 - Real-time notifications via **SignalR**
 - Role management and user account control
 - **File** download support for book content
